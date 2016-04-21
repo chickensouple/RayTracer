@@ -1,0 +1,15 @@
+*.o
+*.out
+build
+bin
+*.tmp
+*.TMP
+*.swp
+*swp
+*~
+~*
+*~*
+*.SWP
+*swp
+
+
