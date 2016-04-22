@@ -19,7 +19,7 @@ int main() {
 
 	Scene scene;
 	scene.spheres.push_back({Eigen::Vector3f(0, 0, -10), 10, {255, 0, 0}});
-	// scene.spheres.push_back({Eigen::Vector3f(20, 0, 100), 10, {0, 255, 0}});
+	scene.spheres.push_back({Eigen::Vector3f(20, 0, -10), 10, {255, 255, 255}});
 	// scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
 	// scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
 	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 1});
@@ -31,7 +31,7 @@ int main() {
 		for (int j = 0; j < mat.cols; j++) {
 			int idx = i * mat.cols + j;
 
-			cv::Vec3b& color = mat.at<cv::Vec3b>(mat.rows - i, j);
+			cv::Vec3b& color = mat.at<cv::Vec3b>(mat.rows - i - 1, j);
 			color[0] = data[idx][0];
 			color[1] = data[idx][1];
 			color[2] = data[idx][2];
