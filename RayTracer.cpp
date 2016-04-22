@@ -78,7 +78,7 @@ RayTracer::calculateClosestIntersect(const Ray& ray, const std::vector<Sphere>& 
 		}
 
 		foundIntersection = true;
-		float dist = intersection.second.norm();
+		float dist = (intersection.second - ray.center).norm();
 		if (minDist == -1 or dist < minDist) {
 			minDist = dist;
 			minIntersectionPoint = intersection.second;
@@ -116,13 +116,13 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 	viewVec.normalize();
 
 
-	float intensity = 0;
+	// ambient light 
+	float intensity = 0.1;
+
 	for (auto& light : scene.lights) {
 		Eigen::Vector3f lightDir = intersect - light.center;
 		lightDir.normalize();
 
-		// adding ambient component
-		intensity += 0.1 * light.intensity;
 
 		Ray lightRay{light.center, lightDir};
 		auto lightIntersect = calculateClosestIntersect(lightRay, scene.spheres);

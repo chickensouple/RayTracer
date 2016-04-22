@@ -8,21 +8,15 @@
 using namespace std;
 
 int main() {
-	// RayTracer rayTracer(2, 2, 2, 2, 10);
-	// Scene scene;
-	// scene.spheres.push_back({Eigen::Vector3f(0, 0, 20), 10, {255, 0, 0}});
-	// auto data = rayTracer.trace(scene);
-
-
 	RayTracer rayTracer(64, 48, 640, 480, 10);
-	// RayTracer rayTracer(48, 64, 480, 640, 10);
 
 	Scene scene;
 	scene.spheres.push_back({Eigen::Vector3f(0, 0, -10), 10, {255, 0, 0}});
 	scene.spheres.push_back({Eigen::Vector3f(20, 0, -10), 10, {255, 255, 255}});
 	// scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
 	// scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
-	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 1});
+	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 0.5});
+	scene.lights.push_back({Eigen::Vector3f(30, 10, 10), 0.5});
 	auto data = rayTracer.trace(scene);
 
 
