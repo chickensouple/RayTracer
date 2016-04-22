@@ -22,10 +22,10 @@ public:
 	const std::array<uint8_t, 3>* trace(const Scene& scene);
 
 private:
-	float _screenWidth;
-	float _screenLength;
-	int _numWidthPixels;
-	int _numLengthPixels;
+	float _screenColsLength;
+	float _screenRowsLength;
+	int _numColPixels;
+	int _numRowPixels;
 	float _focalLength;
 	Eigen::Vector3f _focalPoint;
 

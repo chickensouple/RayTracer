@@ -28,10 +28,15 @@ CXX_OBJECTS := $(addprefix $(OBJECT_PATH)/Release/, $(CXX_SOURCES:.cpp=.o))
 CXX_DEBUG_OBJECTS := $(addprefix $(OBJECT_PATH)/Debug/, $(CXX_SOURCES:.cpp=.o))
 
 EXECUTABLE := main.out
+TEST_EXECUTABLE := test.out
 
 
 all: $(CXX_OBJECTS) | directories
 	@$(CXX) $(CXX_FLAGS) $^ $(LD_FLAGS) $(INCLUDES) -o $(EXECUTABLE)
+	@echo "Built $@"
+
+test: $(CXX_DEBUG_OBJECTS) | directories
+	@$(CXX) $(CXX_DEBUG_FLAGS) $^ $(LD_FLAGS) $(INCLUDES) -o $(TEST_EXECUTABLE)
 	@echo "Built $@"
 
 # run:

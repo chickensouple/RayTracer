@@ -3,19 +3,19 @@
 
 using namespace std;
 
-RayTracer::RayTracer(float screenWidth, 
-	float screenLength, 
-	int numWidthPixels, 
-	int numLengthPixels, 
+RayTracer::RayTracer(float screenColsLength, 
+	float screenRowsLength, 
+	int numColPixels, 
+	int numRowPixels, 
 	float focalLength) :
-	_screenWidth(screenWidth), 
-	_screenLength(screenLength),
-	_numWidthPixels(numWidthPixels),
-	_numLengthPixels(numLengthPixels),
+	_screenColsLength(screenColsLength), 
+	_screenRowsLength(screenRowsLength),
+	_numColPixels(numColPixels),
+	_numRowPixels(numRowPixels),
 	_focalLength(focalLength),
-	_focalPoint(0, 0, -focalLength) {
+	_focalPoint(0, 0, focalLength) {
 
-	_screen = new std::array<uint8_t, 3>[numWidthPixels * numLengthPixels];
+	_screen = new std::array<uint8_t, 3>[numColPixels * numRowPixels];
 }
 
 RayTracer::~RayTracer() {
@@ -23,13 +23,15 @@ RayTracer::~RayTracer() {
 }
 
 const std::array<uint8_t, 3>* RayTracer::trace(const Scene& scene) {
-	for (int i = 0; i < _numLengthPixels; i++) {
-		float pixelYLoc = (float(i) / _numLengthPixels) * _screenLength - (_screenLength/2);
+	for (int i = 0; i < _numRowPixels; i++) {
+		float pixelYLoc = (float(i) / _numRowPixels) * _screenRowsLength - (_screenRowsLength/2);
 
-		for (int j = 0; j < _numWidthPixels; j++) {
-			float pixelXLoc = (float(j) / _numWidthPixels) * _screenWidth - (_screenWidth/2);
+		for (int j = 0; j < _numColPixels; j++) {
+			float pixelXLoc = (float(j) / _numColPixels) * _screenColsLength - (_screenColsLength/2);
 
-			int imageIndex = i * _numLengthPixels + j;
+			int imageIndex = i * _numColPixels + j;
+
+			// std::cout << "image Index: " << imageIndex << "\ti: " << i << "\tj: " << j << '\n';
 
 			Eigen::Vector3f pixelLoc(pixelXLoc, pixelYLoc, 0);
 			Eigen::Vector3f dir = pixelLoc - _focalPoint;
@@ -60,7 +62,6 @@ const std::array<uint8_t, 3>* RayTracer::trace(const Scene& scene) {
 
 	return _screen;
 }
-
 
 std::tuple<bool, Eigen::Vector3f, const Sphere*>  
 RayTracer::calculateClosestIntersect(const Ray& ray, const std::vector<Sphere>& spheres) {
@@ -121,7 +122,7 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 		lightDir.normalize();
 
 		// adding ambient component
-		intensity += 0.05 * light.intensity;
+		intensity += 0.3 * light.intensity;
 
 		Ray lightRay{light.center, lightDir};
 		auto lightIntersect = calculateClosestIntersect(lightRay, scene.spheres);
