@@ -32,11 +32,11 @@ private:
 	std::array<uint8_t, 3>* _screen;
 
 private:
-	std::tuple<bool, Eigen::Vector3f, const Sphere*> 
+	static std::tuple<bool, Eigen::Vector3f, const Sphere*> 
 	calculateClosestIntersect(const Ray& ray, const std::vector<Sphere>& spheres);
 
 	// finds the first intersection of a ray with a sphere, if at least one exists
-	std::pair<bool, Eigen::Vector3f> calculateIntersect(const Ray& ray, const Sphere& sphere);
+	static std::pair<bool, Eigen::Vector3f> calculateIntersect(const Ray& ray, const Sphere& sphere);
 
 
 	float getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,

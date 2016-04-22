@@ -90,7 +90,7 @@ RayTracer::calculateClosestIntersect(const Ray& ray, const std::vector<Sphere>& 
 
 std::pair<bool, Eigen::Vector3f> RayTracer::calculateIntersect(const Ray& ray, const Sphere& sphere) {
 
-	Eigen::Vector3f cVec = sphere.center - _focalPoint;
+	Eigen::Vector3f cVec = sphere.center - ray.center;
 	float cDotD = cVec.dot(ray.dir);
 	float cVecNorm = cVec.norm();
 	float p = std::sqrt(cVecNorm*cVecNorm - cDotD*cDotD);
@@ -123,14 +123,13 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 		// adding ambient component
 		intensity += 0.05 * light.intensity;
 
-
 		Ray lightRay{light.center, lightDir};
 		auto lightIntersect = calculateClosestIntersect(lightRay, scene.spheres);
 
-		if (std::get<0>(lightIntersect)) {
-			cout << "light intersect:\n" << std::get<1>(lightIntersect) << '\n';
-			std::cout << "intersect:\n" << intersect << '\n';
-		}
+		// if (std::get<0>(lightIntersect)) {
+		// 	cout << "light intersect:\n" << std::get<1>(lightIntersect) << '\n';
+		// 	std::cout << "intersect:\n" << intersect << '\n';
+		// }
 
 		if (std::get<0>(lightIntersect) and 
 			(std::get<2>(lightIntersect) != sphere or
