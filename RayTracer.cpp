@@ -112,7 +112,7 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 	const Sphere* sphere,
 	const Scene& scene) {
 
-	Eigen::Vector3f viewVec = intersect - _focalPoint;
+	Eigen::Vector3f viewVec = _focalPoint - intersect;
 	viewVec.normalize();
 
 
@@ -122,16 +122,12 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 		lightDir.normalize();
 
 		// adding ambient component
-		intensity += 0.3 * light.intensity;
+		intensity += 0.1 * light.intensity;
 
 		Ray lightRay{light.center, lightDir};
 		auto lightIntersect = calculateClosestIntersect(lightRay, scene.spheres);
 
-		// if (std::get<0>(lightIntersect)) {
-		// 	cout << "light intersect:\n" << std::get<1>(lightIntersect) << '\n';
-		// 	std::cout << "intersect:\n" << intersect << '\n';
-		// }
-
+		// TODO: check why it doesn't intersect sometimes
 		if (std::get<0>(lightIntersect) and 
 			(std::get<2>(lightIntersect) != sphere or
 			not std::get<1>(lightIntersect).isApprox(intersect, 0.1))) {
@@ -144,10 +140,14 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 
 		// adding diffuse component
 		float normalDotLight = normalVec.dot(-lightDir);
-		intensity += normalDotLight * light.intensity;
+		intensity += normalDotLight * light.intensity * 0.8;
 
 		// adding specular component
 
+		// reflection vector
+		Eigen::Vector3f lightReflection = lightDir - 2*(normalVec.dot(lightDir))*normalVec;
+		float specular = std::pow(lightReflection.dot(viewVec), 16);
+		intensity += specular * light.intensity;
 	}
 
 	if (intensity > 1) {

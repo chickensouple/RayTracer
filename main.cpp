@@ -22,7 +22,7 @@ int main() {
 	// scene.spheres.push_back({Eigen::Vector3f(20, 0, 100), 10, {0, 255, 0}});
 	// scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
 	// scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
-	scene.lights.push_back({Eigen::Vector3f(3, 20, 10), 1});
+	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 1});
 	auto data = rayTracer.trace(scene);
 
 
@@ -31,7 +31,7 @@ int main() {
 		for (int j = 0; j < mat.cols; j++) {
 			int idx = i * mat.cols + j;
 
-			cv::Vec3b& color = mat.at<cv::Vec3b>(i, j);
+			cv::Vec3b& color = mat.at<cv::Vec3b>(mat.rows - i, j);
 			color[0] = data[idx][0];
 			color[1] = data[idx][1];
 			color[2] = data[idx][2];
