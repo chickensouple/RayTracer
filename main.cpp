@@ -12,7 +12,8 @@ int main() {
 
 	Scene scene;
 	scene.spheres.push_back({Eigen::Vector3f(0, 0, -10), 10, {255, 0, 0}});
-	scene.spheres.push_back({Eigen::Vector3f(20, 0, -10), 10, {255, 255, 255}});
+	scene.spheres.push_back({Eigen::Vector3f(5, 0, -4), 5, {255, 255, 255}});
+	scene.spheres.push_back({Eigen::Vector3f(-5, 0, -4), 5, {255, 255, 255}});
 	// scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
 	// scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
 	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 0.5});
