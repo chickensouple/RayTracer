@@ -140,6 +140,9 @@ float RayTracer::getPhongIlluminationIntensity(const Eigen::Vector3f& intersect,
 
 		// adding diffuse component
 		float normalDotLight = normalVec.dot(-lightDir);
+		if (normalDotLight < 0) {
+			normalDotLight = 0;
+		}
 		intensity += normalDotLight * light.intensity * 0.8;
 
 		// adding specular component

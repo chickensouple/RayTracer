@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
@@ -7,21 +8,7 @@
 
 using namespace std;
 
-int main() {
-	RayTracer rayTracer(64, 48, 640, 480, 10);
-
-	Scene scene;
-	scene.spheres.push_back({Eigen::Vector3f(0, 0, -10), 10, {255, 0, 0}});
-	scene.spheres.push_back({Eigen::Vector3f(5, 0, -4), 5, {255, 255, 255}});
-	scene.spheres.push_back({Eigen::Vector3f(-5, 0, -4), 5, {255, 255, 255}});
-	// scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
-	// scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
-	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 0.5});
-	scene.lights.push_back({Eigen::Vector3f(30, 10, 10), 0.5});
-	auto data = rayTracer.trace(scene);
-
-
-	cv::Mat mat(480, 640, CV_8UC3);
+void populateMat(cv::Mat& mat, const std::array<uint8_t, 3>* data) {
 	for (int i = 0; i < mat.rows; i++) {
 		for (int j = 0; j < mat.cols; j++) {
 			int idx = i * mat.cols + j;
@@ -32,11 +19,52 @@ int main() {
 			color[2] = data[idx][2];
 		}
 	}
+}
 
+
+int main() {
+
+	int width = 640;
+	int height = 480;
+
+	RayTracer rayTracer(64, 48, width, height, 10);
+
+	Scene scene;
+	scene.spheres.push_back({Eigen::Vector3f(0, 0, -10), 10, {255, 0, 0}});
+	scene.spheres.push_back({Eigen::Vector3f(5, 0, -4), 5, {255, 255, 255}});
+	scene.spheres.push_back({Eigen::Vector3f(-5, 0, -4), 5, {255, 255, 255}});
+	// scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
+	// scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
+	scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 0.5});
+	scene.lights.push_back({Eigen::Vector3f(-30, 10, 10), 0.5});
+
+	std::chrono::time_point<std::chrono::system_clock> start, end;
+	start = std::chrono::system_clock::now();
+
+	auto data = rayTracer.trace(scene);	
+
+	end = std::chrono::system_clock::now();
+
+	std::chrono::duration<double> elapsed_seconds = end-start;
+	std::cout <<  "trace took " << elapsed_seconds.count() << " seconds\n";
+
+
+	cv::Mat mat(height, width, CV_8UC3);
+	populateMat(mat, data);
+
+	Light& light = scene.lights[1];
 
 	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
 	cv::imshow("Display window", mat);
-	cv::waitKey(0);
+	cv::waitKey(25);
+
+	for (int i = 0; i < 100; i++) {
+		light.center[0]	+= 1;
+		data = rayTracer.trace(scene);
+		populateMat(mat, data);
+		cv::imshow("Display window", mat);
+		cv::waitKey(25);
+	}
 
 	return 0;
 }
