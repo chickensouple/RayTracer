@@ -58,13 +58,26 @@ int main() {
 	cv::imshow("Display window", mat);
 	cv::waitKey(25);
 
-	for (int i = 0; i < 100; i++) {
-		light.center[0]	+= 1;
-		data = rayTracer.trace(scene);
-		populateMat(mat, data);
-		cv::imshow("Display window", mat);
-		cv::waitKey(25);
+	while (1) {
+
+		for (int i = 0; i < 100; i++) {
+			light.center[0]	+= 1;
+			data = rayTracer.trace(scene);
+			populateMat(mat, data);
+			cv::imshow("Display window", mat);
+			cv::waitKey(25);
+		}
+
+		for (int i = 0; i < 100; i++) {
+			light.center[0]	-= 1;
+			data = rayTracer.trace(scene);
+			populateMat(mat, data);
+			cv::imshow("Display window", mat);
+			cv::waitKey(25);
+		}
 	}
+
+	cv::waitKey(0);
 
 	return 0;
 }
