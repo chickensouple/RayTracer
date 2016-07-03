@@ -2,6 +2,7 @@
 export MAKEFLAGS=--no-print-directory
 
 CXX_SOURCES := $(wildcard *.cpp)
+# CXX_SOURCES := $(filter-out RayTracer.cpp, $(CXX_SOURCES))
 
 # directory variables
 ROOT_DIR = $(shell pwd)
