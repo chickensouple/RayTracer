@@ -1,5 +1,6 @@
 #include <iostream>
 #include <chrono>
+#include <cmath>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/opencv.hpp>
@@ -35,7 +36,7 @@ int main() {
 	scene.lights.push_back({Eigen::Vector3f(10, 20, -10), 0.5});
 	scene.lights.push_back({Eigen::Vector3f(-30, 10, -10), 0.5});
 
-	Camera camera(height, width, 48, 64, 10);
+	Camera camera(height, width, 4.8, 6.4, 1);
 	camera.setCenter({0, 0, -10});
 	camera.setViewVectors({0, 0, 1}, {0, 1, 0});
 
@@ -52,6 +53,18 @@ int main() {
 		for (int i = 0; i < 100; i++) {
 			light.center[0]	+= dir;
 
+			float cameraParameterTheta = (M_PI * i) / 50;
+			float cameraX = 20 * sin(cameraParameterTheta);
+			float cameraZ = 20 * cos(cameraParameterTheta) + 10;
+
+			Eigen::Vector3f cameraCenter(cameraX, 0, cameraZ);
+			camera.setCenter(cameraCenter);
+
+			Eigen::Vector3f dir = Eigen::Vector3f(0, 0, 10) - cameraCenter;
+			dir.normalize();
+			camera.setViewVectors(dir, {0, 1, 0});
+
+
 			std::chrono::time_point<std::chrono::system_clock> start, end;
 			start = std::chrono::system_clock::now();
 			auto data = rayTracer.trace();
@@ -64,7 +77,7 @@ int main() {
 			populateMat(mat, data);
 			cv::imshow("Display window", mat);
 			
-			cv::waitKey(25);
+			cv::waitKey(10);
 		}
 
 		dir *= -1;
