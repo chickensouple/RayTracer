@@ -41,94 +41,34 @@ int main() {
 
 	RayTracer rayTracer(camera, scene);
 
-	auto data = rayTracer.trace();
-
 	cv::Mat mat(height, width, CV_8UC3);
-	populateMat(mat, data);
 	cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
 	cv::imshow("Display window", mat);
-	cv::waitKey(25);
-
 
 	Light& light = scene.lights[1];
 
+	int dir = 1;
 	while (1) {
-
 		for (int i = 0; i < 100; i++) {
-			light.center[0]	+= 1;
-			data = rayTracer.trace();
+			light.center[0]	+= dir;
+
+			std::chrono::time_point<std::chrono::system_clock> start, end;
+			start = std::chrono::system_clock::now();
+			auto data = rayTracer.trace();
+			end = std::chrono::system_clock::now();
+			std::chrono::duration<double> elapsed_seconds = end-start;
+			std::cout <<  "trace took " << elapsed_seconds.count() << 
+				" seconds. that is " << 1.0 / elapsed_seconds.count() << 
+				" fps\n";
+
 			populateMat(mat, data);
 			cv::imshow("Display window", mat);
+			
 			cv::waitKey(25);
 		}
 
-		for (int i = 0; i < 100; i++) {
-			light.center[0]	-= 1;
-			data = rayTracer.trace();
-			populateMat(mat, data);
-			cv::imshow("Display window", mat);
-			cv::waitKey(25);
-		}
+		dir *= -1;
 	}
-
-
-
-	// int width = 640;
-	// int height = 480;
-
-	// RayTracer rayTracer(64, 48, width, height, 10);
-
-	// Scene scene;
-	// scene.spheres.push_back({Eigen::Vector3f(0, 0, -10), 10, {255, 0, 0}});
-	// scene.spheres.push_back({Eigen::Vector3f(5, 0, -4), 5, {255, 255, 255}});
-	// scene.spheres.push_back({Eigen::Vector3f(-5, 0, -4), 5, {255, 255, 255}});
-	// // scene.spheres.push_back({Eigen::Vector3f(40, 0, 100), 10, {0, 255, 0}});
-	// // scene.spheres.push_back({Eigen::Vector3f(-40, 0, 100), 10, {0, 255, 0}});
-	// scene.lights.push_back({Eigen::Vector3f(10, 20, 10), 0.5});
-	// scene.lights.push_back({Eigen::Vector3f(-30, 10, 10), 0.5});
-
-	// std::chrono::time_point<std::chrono::system_clock> start, end;
-	// start = std::chrono::system_clock::now();
-
-	// auto data = rayTracer.trace(scene);
-
-	// end = std::chrono::system_clock::now();
-
-	// std::chrono::duration<double> elapsed_seconds = end-start;
-	// std::cout <<  "trace took " << elapsed_seconds.count() << " seconds\n";
-
-
-	// cv::Mat mat(height, width, CV_8UC3);
-	// populateMat(mat, data);
-
-	// Light& light = scene.lights[1];
-
-	// cv::namedWindow("Display window", cv::WINDOW_AUTOSIZE);
-	// cv::imshow("Display window", mat);
-	// cv::waitKey(25);
-
-	// while (1) {
-
-	// 	for (int i = 0; i < 100; i++) {
-	// 		light.center[0]	+= 1;
-	// 		data = rayTracer.trace(scene);
-	// 		populateMat(mat, data);
-	// 		cv::imshow("Display window", mat);
-	// 		cv::waitKey(25);
-	// 	}
-
-	// 	for (int i = 0; i < 100; i++) {
-	// 		light.center[0]	-= 1;
-	// 		data = rayTracer.trace(scene);
-	// 		populateMat(mat, data);
-	// 		cv::imshow("Display window", mat);
-	// 		cv::waitKey(25);
-	// 	}
-	// }
-
-	// cv::waitKey(0);
-
-	// return 0;
 }
 
 
