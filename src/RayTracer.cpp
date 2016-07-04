@@ -14,12 +14,6 @@ static std::tuple<const Sphere*, Eigen::Vector3f, float>
 static std::tuple<bool, Eigen::Vector3f, float> 
 	calculateIntersect(const Ray& ray, const Sphere& sphere);
 
-static float getPhongIlluminationIntensity(
-	const Ray& ray,
-	const Eigen::Vector3f& intersect,
-	const Sphere* sphere,
-	const Scene& scene);
-
 static std::array<float, 3> getPhongIllumination(
 	const Ray& ray,
 	const Eigen::Vector3f& intersect,
@@ -51,7 +45,6 @@ const std::array<uint8_t, 3>* RayTracer::trace() {
 	return _screen;
 }
 
-
 std::array<float, 3> traceRay(const Ray& ray, const Scene& scene) {
 
 	std::tuple<const Sphere*, Eigen::Vector3f, float> intersect = 
@@ -64,21 +57,11 @@ std::array<float, 3> traceRay(const Ray& ray, const Scene& scene) {
 	if (intersectSphere == nullptr) {
 		return {0, 0, 0};
 	} else {
-
-
-
 		std::array<float, 3> hsvSphereColor = getPhongIllumination(ray, intersectPt, intersectSphere, scene);
-		// std::array<float, 3> hsvSphereColor = convertRGBtoHSV(intersectSphere->color);
-		// float intensity = getPhongIlluminationIntensity(ray, intersectPt, intersectSphere, scene);
-		
-		// hsvSphereColor[2] *= intensity;
 
 		return hsvSphereColor;
 	}
-
 }
-
-
 
 std::tuple<const Sphere*, Eigen::Vector3f, float> 
 calculateFirstIntersect(const Ray& ray, const Scene& scene) {
@@ -132,65 +115,6 @@ std::tuple<bool, Eigen::Vector3f, float> calculateIntersect(const Ray& ray, cons
 	return std::make_tuple(true, intersection, intersectionDist);
 }
 
-float getPhongIlluminationIntensity(
-	const Ray& ray,
-	const Eigen::Vector3f& intersect,
-	const Sphere* sphere,
-	const Scene& scene) {
-
-	Eigen::Vector3f viewVec = ray.center - intersect;
-	viewVec.normalize();
-
-	// ambient light 
-	float intensity = 0.1;
-
-	for (auto& light : scene.lights) {
-		Eigen::Vector3f lightDir = light.center - intersect;
-		lightDir.normalize();
-
-		Ray lightRay{intersect, lightDir};
-		std::tuple<const Sphere*, Eigen::Vector3f, float> lightIntersect =
-			calculateFirstIntersect(lightRay, scene);
-
-		const Sphere* lightIntersectSphere = std::get<0>(lightIntersect);
-		// Eigen::Vector3f& lightIntersectPt = std::get<1>(lightIntersect);
-		float intersectDist = std::get<2>(lightIntersect);
-
-		float lightDist = (light.center - intersect).norm();
-
-		// if light hits an object before the light source, 
-		// it's a shadow
-		if (lightIntersectSphere != nullptr and
-			intersectDist < lightDist) {
-			continue;
-		}
-
-		Eigen::Vector3f normalVec = intersect - sphere->center;
-		normalVec.normalize();
-
-		// adding diffuse component
-		float normalDotLight = normalVec.dot(lightDir);
-		if (normalDotLight < 0) {
-			normalDotLight = 0;
-		}
-		intensity += normalDotLight * light.intensity * 0.8;
-
-		// adding specular component
-
-		// reflection vector
-		Eigen::Vector3f lightReflection = lightDir - 2*(normalVec.dot(lightDir))*normalVec;
-		float specular = std::pow(lightReflection.dot(viewVec), 16);
-		intensity += specular * light.intensity;
-	}
-
-	if (intensity > 1) {
-		intensity = 1;
-	}
-
-	return intensity;
-}
-
-
 static std::array<float, 3> getPhongIllumination(
 	const Ray& ray,
 	const Eigen::Vector3f& intersect,
@@ -200,22 +124,25 @@ static std::array<float, 3> getPhongIllumination(
 	Eigen::Vector3f viewVec = ray.center - intersect;
 	viewVec.normalize();
 
+	const Material::MaterialProperty& material = sphere->material;
+
+
 	// ambient light 
-	float intensity = 0.1;
+	float intensity = material.ambientConstant;
 	float specularIntensity = 0;
 
 	for (auto& light : scene.lights) {
 		Eigen::Vector3f lightDir = light.center - intersect;
 		lightDir.normalize();
 
-		Ray lightRay{intersect, lightDir};
+		Ray shadowRay{intersect, lightDir};
 		std::tuple<const Sphere*, Eigen::Vector3f, float> lightIntersect =
-			calculateFirstIntersect(lightRay, scene);
+			calculateFirstIntersect(shadowRay, scene);
 
 		const Sphere* lightIntersectSphere = std::get<0>(lightIntersect);
-		// Eigen::Vector3f& lightIntersectPt = std::get<1>(lightIntersect);
 		float intersectDist = std::get<2>(lightIntersect);
 
+		// distance to light
 		float lightDist = (light.center - intersect).norm();
 
 		// if light hits an object before the light source, 
@@ -233,13 +160,13 @@ static std::array<float, 3> getPhongIllumination(
 		if (normalDotLight < 0) {
 			normalDotLight = 0;
 		}
-		intensity += normalDotLight * light.intensity * 0.8;
+		intensity += normalDotLight * light.intensity * material.diffuseConstant;
 
 		// adding specular component
 
 		// reflection vector
 		Eigen::Vector3f lightReflection = lightDir - 2*(normalVec.dot(lightDir))*normalVec;
-		float specular = std::pow(lightReflection.dot(viewVec), 16);
+		float specular = material.specularConstant * std::pow(lightReflection.dot(viewVec), material.specularFocus);
 		specularIntensity += specular;
 		intensity += specular;
 	}

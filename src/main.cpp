@@ -8,6 +8,7 @@
 #include <opencv2/core/core.hpp>
 #include "RayTracer.hpp"
 #include "ColorCoordinates.hpp"
+#include "MaterialProperty.hpp"
 
 using namespace std;
 using namespace Alectryon;
@@ -30,9 +31,9 @@ int main() {
 	int height = 480;
 
 	Scene scene;
-	scene.spheres.push_back({Eigen::Vector3f(0, 0, 10), 10, {255, 0, 0}});
-	scene.spheres.push_back({Eigen::Vector3f(5, 0, 4), 5, {255, 255, 255}});
-	scene.spheres.push_back({Eigen::Vector3f(-5, 0, 4), 5, {255, 255, 255}});
+	scene.spheres.push_back({Eigen::Vector3f(0, 0, 10), 10, {255, 0, 0}, Material::DefaultShiny});
+	scene.spheres.push_back({Eigen::Vector3f(5, 0, 4), 5, {255, 255, 255}, Material::DefaultShiny});
+	scene.spheres.push_back({Eigen::Vector3f(-5, 0, 4), 5, {255, 255, 255}, Material::DefaultShiny});
 
 
 	scene.lights.push_back({Eigen::Vector3f(10, 20, 0), 0.5});
