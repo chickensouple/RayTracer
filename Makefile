@@ -1,7 +1,7 @@
 
 export MAKEFLAGS=--no-print-directory
 
-CXX_SOURCES := $(wildcard *.cpp)
+CXX_SOURCES := $(wildcard src/*.cpp)
 # CXX_SOURCES := $(filter-out RayTracer.cpp, $(CXX_SOURCES))
 
 # directory variables
@@ -28,23 +28,22 @@ OBJECT_PATH := $(subst $(ROOT_DIR), $(BUILD_DIR), $(shell pwd))
 CXX_OBJECTS := $(addprefix $(OBJECT_PATH)/Release/, $(CXX_SOURCES:.cpp=.o))
 CXX_DEBUG_OBJECTS := $(addprefix $(OBJECT_PATH)/Debug/, $(CXX_SOURCES:.cpp=.o))
 
-EXECUTABLE := main.out
-TEST_EXECUTABLE := test.out
-
+EXECUTABLE := $(OUTPUT_DIR)/main.out
+TEST_EXECUTABLE := $(OUTPUT_DIR)/debug_main.out
 
 all: $(CXX_OBJECTS) | directories
 	@$(CXX) $(CXX_FLAGS) $^ $(LD_FLAGS) $(INCLUDES) -o $(EXECUTABLE)
 	@echo "Built $@"
 
-test: $(CXX_DEBUG_OBJECTS) | directories
+debug: $(CXX_DEBUG_OBJECTS) | directories
 	@$(CXX) $(CXX_DEBUG_FLAGS) $^ $(LD_FLAGS) $(INCLUDES) -o $(TEST_EXECUTABLE)
 	@echo "Built $@"
 
-# run:
-# 	bin/main.out
+run:
+	bin/main.out
 
-# rundebug:
-# 	gdb bin/debug_main.out
+rundebug:
+	ddd bin/debug_main.out
 
 # dependency files
 DEP_FILES := $(shell find $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST)))) -name '*.d')
