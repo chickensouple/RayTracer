@@ -4,7 +4,7 @@
 
 namespace Alectryon {
 
-static std::tuple<const Sphere*, Eigen::Vector3f> 
+static std::tuple<const Sphere*, Eigen::Vector3f, float> 
 	calculateFirstIntersect(const Ray& ray, const Scene& scene);
 
 
@@ -34,7 +34,8 @@ const std::array<uint8_t, 3>* RayTracer::trace() {
 
 			Ray ray = _camera.getRay(i, j);
 
-			std::tuple<const Sphere*, Eigen::Vector3f> intersect = calculateFirstIntersect(ray, _scene);
+			std::tuple<const Sphere*, Eigen::Vector3f, float> intersect = 
+				calculateFirstIntersect(ray, _scene);
 
 			const Sphere* intersectSphere = std::get<0>(intersect);
 			Eigen::Vector3f& intersectPt = std::get<1>(intersect);
@@ -55,7 +56,7 @@ const std::array<uint8_t, 3>* RayTracer::trace() {
 	return _screen;
 }
 
-std::tuple<const Sphere*, Eigen::Vector3f> 
+std::tuple<const Sphere*, Eigen::Vector3f, float> 
 calculateFirstIntersect(const Ray& ray, const Scene& scene) {
 
 	const Sphere* intersectSphere = nullptr;
@@ -76,7 +77,7 @@ calculateFirstIntersect(const Ray& ray, const Scene& scene) {
 		}
 	}
 
-	return std::make_tuple(intersectSphere, minIntersectionPoint);
+	return std::make_tuple(intersectSphere, minIntersectionPoint, minDist);
 }
 
 std::tuple<bool, Eigen::Vector3f, float> calculateIntersect(const Ray& ray, const Sphere& sphere) {
@@ -120,21 +121,23 @@ float getPhongIlluminationIntensity(
 	float intensity = 0.1;
 
 	for (auto& light : scene.lights) {
-		Eigen::Vector3f lightDir = intersect - light.center;
+		Eigen::Vector3f lightDir = light.center - intersect;
 		lightDir.normalize();
 
-
-		Ray lightRay{light.center, lightDir};
-		
-		std::tuple<const Sphere*, Eigen::Vector3f> lightIntersect = 
+		Ray lightRay{intersect, lightDir};
+		std::tuple<const Sphere*, Eigen::Vector3f, float> lightIntersect =
 			calculateFirstIntersect(lightRay, scene);
 
 		const Sphere* lightIntersectSphere = std::get<0>(lightIntersect);
-		Eigen::Vector3f& lightIntersectPt = std::get<1>(lightIntersect);
+		// Eigen::Vector3f& lightIntersectPt = std::get<1>(lightIntersect);
+		float intersectDist = std::get<2>(lightIntersect);
 
-		// TODO: check why it doesn't intersect sometimes
-		if (lightIntersectSphere != sphere or
-			not lightIntersectPt.isApprox(intersect, 0.1)) {
+		float lightDist = (light.center - intersect).norm();
+
+		// if light hits an object before the light source, 
+		// it's a shadow
+		if (lightIntersectSphere != nullptr and
+			intersectDist < lightDist) {
 			continue;
 		}
 
@@ -142,7 +145,7 @@ float getPhongIlluminationIntensity(
 		normalVec.normalize();
 
 		// adding diffuse component
-		float normalDotLight = normalVec.dot(-lightDir);
+		float normalDotLight = normalVec.dot(lightDir);
 		if (normalDotLight < 0) {
 			normalDotLight = 0;
 		}
