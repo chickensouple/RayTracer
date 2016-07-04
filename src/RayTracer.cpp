@@ -67,9 +67,6 @@ std::array<float, 3> traceRay(const Ray& ray, const Scene& scene) {
 		std::array<float, 3> hsvSphereColor = convertRGBtoHSV(intersectSphere->color);
 		float intensity = getPhongIlluminationIntensity(ray, intersectPt, intersectSphere, scene);
 		
-		intensity *= 3;
-		if (intensity > 1)
-			intensity = 1;
 		hsvSphereColor[2] *= intensity;
 
 		return hsvSphereColor;
