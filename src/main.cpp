@@ -7,6 +7,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/core.hpp>
 #include "RayTracer.hpp"
+#include "ColorCoordinates.hpp"
 
 using namespace std;
 using namespace Alectryon;
@@ -23,7 +24,6 @@ void populateMat(cv::Mat& mat, const std::array<uint8_t, 3>* data) {
 		}
 	}
 }
-
 
 int main() {
 	int width = 640;

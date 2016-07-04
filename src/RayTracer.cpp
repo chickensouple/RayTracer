@@ -1,8 +1,11 @@
 #include "RayTracer.hpp"
+#include "ColorCoordinates.hpp"
 #include <tuple>
 #include <iostream>
 
 namespace Alectryon {
+
+static std::array<float, 3> traceRay(const Ray& ray, const Scene& scene);
 
 static std::tuple<const Sphere*, Eigen::Vector3f, float> 
 	calculateFirstIntersect(const Ray& ray, const Scene& scene);
@@ -34,27 +37,47 @@ const std::array<uint8_t, 3>* RayTracer::trace() {
 
 			Ray ray = _camera.getRay(i, j);
 
-			std::tuple<const Sphere*, Eigen::Vector3f, float> intersect = 
-				calculateFirstIntersect(ray, _scene);
-
-			const Sphere* intersectSphere = std::get<0>(intersect);
-			Eigen::Vector3f& intersectPt = std::get<1>(intersect);
-
-			if (intersectSphere == nullptr) {
-				// ray doesn't hit anything
-				_screen[imageIndex] = {0, 0, 0};
-			} else {
-				float intensity = getPhongIlluminationIntensity(ray, intersectPt, intersectSphere, _scene);
-			
-				_screen[imageIndex] = intersectSphere->color;
-				for (auto& color : _screen[imageIndex]) {
-					color *= intensity;
-				}
+			if (i == 240 and j == 360) {
+				std::cout << "blah\n";
 			}
+
+			std::array<float, 3> hsv = traceRay(ray, _scene);
+			std::array<uint8_t, 3> rgb = convertHSVtoRGB(hsv);
+			_screen[imageIndex] = rgb;
 		}
 	}
 	return _screen;
 }
+
+
+std::array<float, 3> traceRay(const Ray& ray, const Scene& scene) {
+
+	std::tuple<const Sphere*, Eigen::Vector3f, float> intersect = 
+		calculateFirstIntersect(ray, scene);
+
+	const Sphere* intersectSphere = std::get<0>(intersect);
+	Eigen::Vector3f& intersectPt = std::get<1>(intersect);
+
+
+	if (intersectSphere == nullptr) {
+		return {0, 0, 0};
+	} else {
+
+
+		std::array<float, 3> hsvSphereColor = convertRGBtoHSV(intersectSphere->color);
+		float intensity = getPhongIlluminationIntensity(ray, intersectPt, intersectSphere, scene);
+		
+		intensity *= 3;
+		if (intensity > 1)
+			intensity = 1;
+		hsvSphereColor[2] *= intensity;
+
+		return hsvSphereColor;
+	}
+
+}
+
+
 
 std::tuple<const Sphere*, Eigen::Vector3f, float> 
 calculateFirstIntersect(const Ray& ray, const Scene& scene) {
