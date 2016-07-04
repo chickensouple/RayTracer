@@ -1,5 +1,9 @@
-TODO:
 
--Get rid of black lines from negative diffuse light stuff
+
+TODO:
+- make ray tracing multi threaded
+- material properties
+- multiple bounces
+- more shapes
 
 
