@@ -20,6 +20,12 @@ static float getPhongIlluminationIntensity(
 	const Sphere* sphere,
 	const Scene& scene);
 
+static std::array<float, 3> getPhongIllumination(
+	const Ray& ray,
+	const Eigen::Vector3f& intersect,
+	const Sphere* sphere,
+	const Scene& scene);
+
 
 RayTracer::RayTracer(const Camera& camera, const Scene& scene) :
 	_camera(camera), _scene(scene) {
@@ -60,10 +66,12 @@ std::array<float, 3> traceRay(const Ray& ray, const Scene& scene) {
 	} else {
 
 
-		std::array<float, 3> hsvSphereColor = convertRGBtoHSV(intersectSphere->color);
-		float intensity = getPhongIlluminationIntensity(ray, intersectPt, intersectSphere, scene);
+
+		std::array<float, 3> hsvSphereColor = getPhongIllumination(ray, intersectPt, intersectSphere, scene);
+		// std::array<float, 3> hsvSphereColor = convertRGBtoHSV(intersectSphere->color);
+		// float intensity = getPhongIlluminationIntensity(ray, intersectPt, intersectSphere, scene);
 		
-		hsvSphereColor[2] *= intensity;
+		// hsvSphereColor[2] *= intensity;
 
 		return hsvSphereColor;
 	}
@@ -180,9 +188,76 @@ float getPhongIlluminationIntensity(
 	}
 
 	return intensity;
-
-
 }
+
+
+static std::array<float, 3> getPhongIllumination(
+	const Ray& ray,
+	const Eigen::Vector3f& intersect,
+	const Sphere* sphere,
+	const Scene& scene) {
+
+	Eigen::Vector3f viewVec = ray.center - intersect;
+	viewVec.normalize();
+
+	// ambient light 
+	float intensity = 0.1;
+	float specularIntensity = 0;
+
+	for (auto& light : scene.lights) {
+		Eigen::Vector3f lightDir = light.center - intersect;
+		lightDir.normalize();
+
+		Ray lightRay{intersect, lightDir};
+		std::tuple<const Sphere*, Eigen::Vector3f, float> lightIntersect =
+			calculateFirstIntersect(lightRay, scene);
+
+		const Sphere* lightIntersectSphere = std::get<0>(lightIntersect);
+		// Eigen::Vector3f& lightIntersectPt = std::get<1>(lightIntersect);
+		float intersectDist = std::get<2>(lightIntersect);
+
+		float lightDist = (light.center - intersect).norm();
+
+		// if light hits an object before the light source, 
+		// it's a shadow
+		if (lightIntersectSphere != nullptr and
+			intersectDist < lightDist) {
+			continue;
+		}
+
+		Eigen::Vector3f normalVec = intersect - sphere->center;
+		normalVec.normalize();
+
+		// adding diffuse component
+		float normalDotLight = normalVec.dot(lightDir);
+		if (normalDotLight < 0) {
+			normalDotLight = 0;
+		}
+		intensity += normalDotLight * light.intensity * 0.8;
+
+		// adding specular component
+
+		// reflection vector
+		Eigen::Vector3f lightReflection = lightDir - 2*(normalVec.dot(lightDir))*normalVec;
+		float specular = std::pow(lightReflection.dot(viewVec), 16);
+		specularIntensity += specular;
+		intensity += specular;
+	}
+
+	std::array<float, 3> sphereHSV = convertRGBtoHSV(sphere->color);
+	if (intensity > 1) {
+		intensity = 1;
+	}
+	sphereHSV[2] *= intensity;
+
+	if (specularIntensity > 1) {
+		specularIntensity = 1;
+	}
+	sphereHSV[1] *= (1 - specularIntensity);
+
+	return sphereHSV;
+}
+
 
 
 }
